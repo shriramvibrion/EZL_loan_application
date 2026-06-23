@@ -19,16 +19,22 @@
 	--apply-text-muted: #475467;
 	--apply-heading: #0a2255;
 	--apply-accent: #0546c7;
-	height: 100dvh;
-	max-height: 100dvh;
-	overflow: hidden;
-	padding-bottom: 0;
+	min-height: 100dvh;
+	padding-top: var(--apply-nav-height);
+	padding-bottom: calc(var(--apply-footer-height) + 20px);
 	color: var(--apply-text);
 	background: #eef3fb;
 	font-family: Inter, system-ui, sans-serif;
 	position: relative;
-	display: flex;
-	flex-direction: column;
+}
+
+.loan-apply-page > .app-navbar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 50;
+	width: 100%;
 }
 
 /* Root app theme is light-on-dark; reset text on buttons/inputs for this page */
@@ -79,88 +85,73 @@
 .loan-apply-shell {
 	position: relative;
 	z-index: 1;
-	flex: 1;
-	min-height: 0;
 	width: 100%;
 	max-width: 1300px;
-	margin: 0 auto;
-	padding: 6px 14px;
+	margin: 12px auto 0;
+	padding: 0 14px 16px;
 	border-radius: 20px 20px 0 0;
 	background: rgba(255, 255, 255, 0.14);
 	border: 1px solid rgba(255, 255, 255, 0.48);
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 24px 56px rgba(76, 91, 126, 0.12);
 	backdrop-filter: blur(14px);
 	-webkit-backdrop-filter: blur(14px);
-	overflow: hidden;
 }
 
 .loan-apply-panel {
 	width: min(var(--apply-max), 100%);
-	height: 100%;
-	min-height: 0;
 	margin: 0 auto;
-	padding: 0;
-	overflow: hidden;
+	padding: 16px 0 0;
 }
 
 .loan-step-card {
-	height: 100%;
-	max-height: 100%;
-	display: flex;
-	flex-direction: column;
 	border: 1px solid #d5dbe6;
 	border-radius: 12px;
 	background: #fff;
 	color: var(--apply-text);
 	box-shadow: 0 16px 36px rgba(38, 57, 89, 0.08);
-	padding: 12px 16px 14px;
-	overflow: hidden;
+	padding: 16px 20px 20px;
 }
 
-.loan-step-body {
-	flex: 1;
-	min-height: 0;
+.loan-step-breadcrumb {
 	display: flex;
-	flex-direction: column;
-	overflow: hidden;
+	justify-content: flex-start;
+	align-items: center;
+	gap: 10px;
+	margin: 0 0 12px;
+	color: var(--apply-text-muted);
+	font-size: 12px;
+	font-weight: 600;
 }
 
-.loan-step-body > .loan-flow-head {
+.loan-step-breadcrumb span:last-child {
+    color: var(--apply-accent); /* #0546c7 blue */
+}
+
+.loan-step-breadcrumb button {
+	border: 0;
+	padding: 0;
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+	font: inherit;
+	font-weight: 600;
+}
+
+.loan-step-breadcrumb button:hover {
+	color: var(--apply-heading);
+}
+
+.loan-step-breadcrumb-sep {
+	width: 6px;
+	height: 6px;
+	border-top: 1px solid #6b7280;
+	border-right: 1px solid #6b7280;
+	transform: rotate(45deg);
 	flex-shrink: 0;
 }
 
-.loan-step-body > .loan-two-column,
-.loan-step-body > .joint-layout,
-.loan-step-body > .document-layout,
-.loan-step-body > .final-layout,
-.loan-step-body > .terms-layout,
-.loan-step-body > .kyc-grid,
-.loan-step-body > .success-layout {
-	flex: 1;
-	min-height: 0;
-	overflow: hidden;
-	align-items: stretch;
-}
-
-.loan-step-body .loan-two-column > .loan-stack,
-.loan-step-body .loan-two-column > .loan-card,
-.loan-step-body .loan-two-column > aside,
-.loan-step-body .joint-layout > *,
-.loan-step-body .document-layout > *,
-.loan-step-body .final-layout > * {
-	min-height: 0;
-	overflow: hidden;
-}
-
-.loan-step-body .loan-stack {
-	flex: 1;
-	min-height: 0;
-	gap: 8px;
-}
-
-.loan-step-body .loan-stack > * {
-	flex-shrink: 1;
-	min-height: 0;
+.loan-step-body {
+	display: block;
 }
 
 .loan-step-body .selection-card {
@@ -228,19 +219,15 @@
 }
 
 .loan-step-body .loan-two-column > .loan-stack:has(.selection-card) {
-	display: grid;
-	grid-template-rows: repeat(5, minmax(0, 1fr));
-	gap: 6px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
 }
 
 .loan-step-body .doc-grid {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	grid-auto-rows: minmax(0, 1fr);
-	gap: 8px;
-	min-height: 0;
-	overflow: hidden;
-	align-content: stretch;
+	gap: 10px;
 }
 
 .loan-step-body .doc-card {
@@ -297,10 +284,6 @@
 }
 
 .loan-flow-head {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) auto;
-	gap: 12px 20px;
-	align-items: end;
 	margin-bottom: 22px;
 	padding-bottom: 18px;
 	border-bottom: 1px solid #e8edf4;
@@ -312,34 +295,6 @@
 	border-radius: 10px;
 	border-bottom: 0;
 	background: linear-gradient(135deg, #f3f7fd, #e6eef9);
-}
-
-.loan-breadcrumb {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	margin-bottom: 12px;
-	color: var(--apply-text-muted);
-	font-size: 12px;
-	font-weight: 600;
-}
-
-.loan-breadcrumb span {
-	width: 6px;
-	height: 6px;
-	border-top: 1px solid #6b7280;
-	border-right: 1px solid #6b7280;
-	transform: rotate(45deg);
-}
-
-.flow-eyebrow {
-	display: block;
-	margin-bottom: 6px;
-	color: var(--apply-accent);
-	font-size: 11px;
-	font-weight: 700;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
 }
 
 .loan-flow-head h1 {
@@ -1813,16 +1768,30 @@
 	left: 0;
 	right: 0;
 	bottom: 0;
-	z-index: 35;
+	z-index: 45;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 20px;
-	min-height: 72px;
+	min-height: var(--apply-footer-height);
 	padding: 10px 40px;
-	background: rgba(248, 250, 252, 0.96);
-	border-top: 1px solid #dbe3ee;
-	backdrop-filter: blur(10px);
+	color: var(--apply-text);
+	background: #ffffff;
+	border-top: 1px solid #c8d4e3;
+	box-shadow: 0 -10px 28px rgba(16, 24, 40, 0.12);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+}
+
+.loan-apply-page .loan-flow-footer small {
+	color: #475467;
+	font-weight: 600;
+}
+
+.loan-apply-page .loan-flow-footer strong {
+	color: #0a2255;
+	font-size: 14px;
+	font-weight: 700;
 }
 
 .loan-flow-footer small,
@@ -1830,20 +1799,21 @@
 	display: block;
 }
 
-.loan-flow-footer small {
-	color: var(--apply-text-muted);
-	font-weight: 600;
-}
-
-.loan-flow-footer strong {
-	color: var(--apply-heading);
-	font-size: 14px;
-	font-weight: 700;
-}
-
 .loan-flow-footer > div:last-child {
 	display: flex;
 	gap: 12px;
+}
+
+.loan-apply-page .loan-flow-footer .footer-secondary {
+	color: #0546c7;
+	background: #fff;
+	border: 1px solid #9ec0f5;
+}
+
+.loan-apply-page .loan-flow-footer .footer-primary {
+	color: #fff;
+	background: #0759e6;
+	box-shadow: 0 8px 18px rgba(7, 89, 230, 0.25);
 }
 
 .footer-secondary,
@@ -1941,21 +1911,8 @@
 
 @media (max-width: 760px) {
 	.loan-apply-page {
-		height: 100dvh;
-		padding-bottom: 0;
-	}
-
-	.loan-step-body {
-		overflow-y: auto;
-		scrollbar-width: thin;
-	}
-
-	.loan-flow-head {
-		grid-template-columns: 1fr;
-	}
-
-	.loan-step-chip {
-		text-align: left;
+		--apply-footer-height: 112px;
+		padding-bottom: calc(var(--apply-footer-height) + 16px);
 	}
 
 	.loan-flow-head h1,

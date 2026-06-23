@@ -117,22 +117,21 @@ function SelectField({ label, value }) {
 	)
 }
 
-function ProgressHeader({ step, eyebrow, title, subtitle, compact }) {
-	const progress = Math.round((step / TOTAL_STEPS) * 100)
+function StepBreadcrumb() {
+	return (
+		<nav className="loan-step-breadcrumb" aria-label="Breadcrumb">
+			<button type="button" onClick={() => navigate('#/information')}>Home</button>
+			<span className="loan-step-breadcrumb-sep" aria-hidden="true" />
+			<span>Apply Loan</span>
+		</nav>
+	)
+}
+
+function ProgressHeader({ title, subtitle, compact }) {
 	return (
 		<section className={`loan-flow-head ${compact ? 'compact' : ''}`}>
-			<div>
-				{eyebrow ? <span className="flow-eyebrow">{eyebrow}</span> : <div className="loan-breadcrumb">Home <span /> Loan Application</div>}
-				<h1>{title}</h1>
-				{subtitle ? <p>{subtitle}</p> : null}
-			</div>
-			<div className="loan-step-chip">
-				<strong>{step === TOTAL_STEPS ? 'All data verified' : `${progress}% Complete`}</strong>
-				<small>Step {step} of {TOTAL_STEPS}</small>
-			</div>
-			<div className="loan-progress-track">
-				<span style={{ width: `${progress}%` }} />
-			</div>
+			<h1>{title}</h1>
+			{subtitle ? <p>{subtitle}</p> : null}
 		</section>
 	)
 }
@@ -180,7 +179,7 @@ function UploadBox({ title, text, action = 'Choose File', tall }) {
 function Step1({ selectedLoan, setSelectedLoan }) {
 	return (
 		<>
-			<ProgressHeader step={1} title="Step 1: Loan Selection" subtitle="Choose the financial product that fits your current needs." />
+			<ProgressHeader title="Loan Selection" subtitle="Choose the financial product that fits your current needs." />
 			<div className="loan-two-column">
 				<section className="loan-stack">
 					{LOAN_TYPES.map((loan) => {
@@ -215,7 +214,7 @@ function Step2({ amount, setAmount }) {
 	const emi = 4250
 	return (
 		<>
-			<ProgressHeader step={2} title={<><span>Loan Information</span><em>& Terms</em></>} subtitle="Provide the specifics of your funding requirement. All calculations are real-time and transparent." />
+			<ProgressHeader title={<><span>Loan Information</span><em>& Terms</em></>} subtitle="Provide the specifics of your funding requirement. All calculations are real-time and transparent." />
 			<div className="loan-two-column terms-layout">
 				<section className="loan-card configure-card">
 					<div className="card-heading"><IconTile icon={IconFileText} /><h2>Configure Loan</h2></div>
@@ -255,7 +254,7 @@ function Step2({ amount, setAmount }) {
 function Step3({ profile, selectedLoan, amount }) {
 	return (
 		<>
-			<ProgressHeader step={3} title={<><span>Confirm your</span><em>Information</em></>} compact />
+			<ProgressHeader title={<><span>Confirm your</span><em>Information</em></>} compact />
 			<div className="trust-row">
 				<span><IconShieldCheck /> RBI Regulated</span>
 				<span><IconLock /> 256-bit Encrypted</span>
@@ -293,7 +292,7 @@ function Step3({ profile, selectedLoan, amount }) {
 function Step4() {
 	return (
 		<>
-			<ProgressHeader step={4} title={<><span>Applicant KYC</span><em>Verification</em></>} subtitle="Please provide your identity details and a clear photograph to complete your Know Your Customer process." />
+			<ProgressHeader title={<><span>Applicant KYC</span><em>Verification</em></>} subtitle="Please provide your identity details and a clear photograph to complete your Know Your Customer process." />
 			<div className="kyc-grid">
 				<section className="loan-card form-card">
 					<div className="card-heading"><IconTile icon={IconId} /><div><h2>Identity Documents</h2><p>Ensure details match your official documents</p></div></div>
@@ -319,7 +318,7 @@ function Step4() {
 function Step5() {
 	return (
 		<>
-			<ProgressHeader step={5} eyebrow="Step 05 of 15" title="Income & Employment" />
+			<ProgressHeader title="Income & Employment" />
 			<div className="loan-two-column">
 				<section className="loan-card form-card">
 					<h2>Employment Type</h2>
@@ -347,7 +346,7 @@ function Step5() {
 function Step6() {
 	return (
 		<>
-			<ProgressHeader step={6} title="Joint Application" />
+			<ProgressHeader title="Joint Application" />
 			<div className="joint-layout">
 				<aside className="loan-card story-card">
 					<IconTile icon={IconUserPlus} />
@@ -369,7 +368,7 @@ function Step6() {
 function Step7() {
 	return (
 		<>
-			<ProgressHeader step={7} eyebrow="Application Journey" title="Co-Applicant KYC" />
+			<ProgressHeader title="Co-Applicant KYC" />
 			<div className="loan-two-column">
 				<section className="loan-stack">
 					<div className="loan-card form-card">
@@ -397,7 +396,7 @@ function Step7() {
 function Step8() {
 	return (
 		<>
-			<ProgressHeader step={8} title="Co-Applicant Income" />
+			<ProgressHeader title="Co-Applicant Income" />
 			<div className="loan-two-column">
 				<section className="loan-stack">
 					<div className="loan-card form-card">
@@ -430,7 +429,7 @@ function Step8() {
 function Step9() {
 	return (
 		<>
-			<ProgressHeader step={9} eyebrow="Step 9 of 15" title="Guarantor Details" />
+			<ProgressHeader title="Guarantor Details" />
 			<div className="loan-two-column slim">
 				<section className="loan-stack">
 					<div className="loan-card toggle-card"><IconTile icon={IconUserPlus} /><div><h2>Add Guarantor</h2><p>Do you have a person to guarantee your loan repayment?</p></div><label className="switch"><input type="checkbox" /><i /></label></div>
@@ -448,7 +447,7 @@ function Step9() {
 function Step10() {
 	return (
 		<>
-			<ProgressHeader step={10} title="Guarantor Verification" subtitle="Official KYC Documentation" />
+			<ProgressHeader title="Guarantor Verification" subtitle="Official KYC Documentation" />
 			<div className="loan-two-column">
 				<section className="loan-stack">
 					<div className="loan-card form-card"><div className="card-heading"><IconTile icon={IconId} /><h2>Identification Documents</h2></div><div className="loan-form-grid one"><Field label="Aadhaar Number (UID)" value="5482 1192 4832" /><Field label="Permanent Account Number (PAN)" value="BRDPK9921Z" /></div></div>
@@ -463,7 +462,7 @@ function Step10() {
 function Step11() {
 	return (
 		<>
-			<ProgressHeader step={11} eyebrow="Step 11 of 15" title="Guarantor Income Details" />
+			<ProgressHeader title="Guarantor Income Details" />
 			<div className="loan-two-column">
 				<section className="loan-stack">
 					<div className="loan-card form-card"><h2>Employment Status</h2><div className="choice-grid"><button type="button" className="selected"><IconBuildingBank size={30} /><b>Salaried</b><small>Full-time employment with regular pay.</small></button><button type="button"><IconBriefcase size={30} /><b>Self-Employed</b><small>Business owner or independent contractor.</small></button></div></div>
@@ -482,7 +481,7 @@ function Step11() {
 function Step12() {
 	return (
 		<>
-			<ProgressHeader step={12} eyebrow="Step 12 of 15" title="Document Upload" />
+			<ProgressHeader title="Document Upload" />
 			<div className="document-layout">
 				<aside className="loan-stack">
 					<div className="loan-card requirements"><h2>Upload Requirements</h2><p><IconCircleCheck /> Files must be in PDF, JPG, or PNG format.</p><p><IconCircleCheck /> Maximum file size per document is 5MB.</p><p><IconCircleCheck /> Ensure text is clear and readable.</p></div>
@@ -509,7 +508,7 @@ function Step12() {
 function Step13() {
 	return (
 		<>
-			<ProgressHeader step={13} eyebrow="Step 13 of 15" title="Eligibility & Review" />
+			<ProgressHeader title="Eligibility & Review" />
 			<div className="loan-two-column">
 				<section className="loan-stack">
 					<div className="approval-card"><h3><IconCircleCheck /> Preliminary Approval Status</h3><div><span><small>Eligible Loan Amount</small><strong>$425,000.00</strong><em>Based on provided financial records.</em></span><span><small>Approval Probability</small><strong>94%</strong><b>High</b></span></div></div>
@@ -524,7 +523,7 @@ function Step13() {
 function Step14() {
 	return (
 		<>
-			<ProgressHeader step={14} eyebrow="Step 14 of 15" title="Legal Compliance" />
+			<ProgressHeader title="Legal Compliance" />
 			<div className="loan-two-column">
 				<section className="loan-stack">
 					<div className="loan-card legal-card"><h2><IconSignature /> Master Loan Agreement <small>v2.4 Last updated Oct 2023</small></h2><h3>1. Introduction and Definitions</h3><p>This Master Loan Agreement governs the terms of your credit facility. By signing below, you acknowledge that you have read and agreed to the terms herein.</p><h3>2. Disbursement of Funds</h3><p>Upon final approval and verification of all documents, funds will be disbursed to the verified bank account provided during the application process.</p><h3>3. Interest and Repayment</h3></div>
@@ -539,7 +538,7 @@ function Step14() {
 function Step15() {
 	return (
 		<>
-			<ProgressHeader step={15} eyebrow="Step 15 of 15" title="Final Review & Submission" />
+			<ProgressHeader title="Final Review & Submission" />
 			<div className="final-layout">
 				<section className="loan-card final-card">
 					<div className="card-title-row"><span><small>Application Reference</small><strong>#LOMS-2024-0892-XF</strong></span><span className="pending-pill">Pending Final Action</span></div>
@@ -604,7 +603,10 @@ export default function ApplyLoan() {
 			<AppNavbar activePage="apply-loan" />
 			<div className="loan-apply-shell">
 				<section className="loan-apply-panel">
-					<div className={`loan-step-card ${isSuccess ? 'is-success' : ''}`}>{cards[activeStep]}</div>
+				<StepBreadcrumb />                              {/* ← moved outside, above card */}
+				<div className={`loan-step-card ${isSuccess ? 'is-success' : ''}`}>
+    				<div className="loan-step-body">{cards[activeStep]}</div>
+				</div>
 				</section>
 			</div>
 			<footer className="loan-flow-footer">
