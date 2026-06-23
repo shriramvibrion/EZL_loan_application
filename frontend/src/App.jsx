@@ -9,9 +9,26 @@ import Profile from './pages/Profile'
 import LoanDashboard from './pages/LoanDashboard'
 import ApplyLoan from './pages/ApplyLoan'
 
+function RequireUser({ children }) {
+  const token = localStorage.getItem('user_token')
+  if (!token) {
+    window.location.hash = '#/user-login'
+    return null
+  }
+  return children
+}
+
+function RequireAdmin({ children }) {
+  const token = localStorage.getItem('admin_token')
+  if (!token) {
+    window.location.hash = '#/admin-login'
+    return null
+  }
+  return children
+}
+
 export default function App() {
   const [route, setRoute] = useState(() => window.location.hash || '#/')
-  const isAuthenticated = Boolean(localStorage.getItem('user_token'))
 
   useEffect(() => {
     const onHash = () => setRoute(window.location.hash || '#/')
@@ -22,13 +39,23 @@ export default function App() {
   if (route.startsWith('#/user-register')) return <UserRegister />
   if (route.startsWith('#/user-login')) return <UserLogin />
   if (route.startsWith('#/admin-login')) return <AdminLogin />
-  if (route.startsWith('#/apply-loan')) return <ApplyLoan />
-  if (route.startsWith('#/information')) return <Information />
-  if (route.startsWith('#/dashboard')) return <LoanDashboard />
-  if (route.startsWith('#/admin-dashboard')) return <AdminDashboard />
-  if (route.startsWith('#/profile')) return <Profile />
 
+  if (route.startsWith('#/dashboard'))
+    return <RequireUser><LoanDashboard /></RequireUser>
+
+  if (route.startsWith('#/profile'))
+    return <RequireUser><Profile /></RequireUser>
+
+  if (route.startsWith('#/apply-loan'))
+    return <RequireUser><ApplyLoan /></RequireUser>
+
+  if (route.startsWith('#/information'))
+    return <RequireUser><Information /></RequireUser>
+
+  if (route.startsWith('#/admin-dashboard'))
+    return <RequireAdmin><AdminDashboard /></RequireAdmin>
+
+  const isAuthenticated = Boolean(localStorage.getItem('user_token'))
   if (isAuthenticated) return <Information />
-
   return <Home />
 }
