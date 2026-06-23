@@ -1,0 +1,68 @@
+USE loan;
+
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS first_name VARCHAR(100) NOT NULL AFTER user_id,
+    ADD COLUMN IF NOT EXISTS last_name VARCHAR(100) NOT NULL AFTER first_name,
+    ADD COLUMN IF NOT EXISTS email VARCHAR(150) NOT NULL UNIQUE AFTER last_name,
+    ADD COLUMN IF NOT EXISTS phone_number VARCHAR(15) NOT NULL UNIQUE AFTER email,
+    ADD COLUMN IF NOT EXISTS password VARCHAR(255) NOT NULL AFTER phone_number,
+    ADD COLUMN IF NOT EXISTS address VARCHAR(255) NULL AFTER password,
+    ADD COLUMN IF NOT EXISTS gender VARCHAR(20) NULL AFTER address,
+    ADD COLUMN IF NOT EXISTS aadhaar_number VARCHAR(32) NULL AFTER gender,
+    ADD COLUMN IF NOT EXISTS aadhaar_status VARCHAR(20) NOT NULL DEFAULT 'not_added' AFTER aadhaar_number,
+    ADD COLUMN IF NOT EXISTS pan_number VARCHAR(16) NULL AFTER aadhaar_status,
+    ADD COLUMN IF NOT EXISTS pan_status VARCHAR(20) NOT NULL DEFAULT 'not_added' AFTER pan_number,
+    ADD COLUMN IF NOT EXISTS last_login_at DATETIME NULL AFTER pan_status,
+    ADD COLUMN IF NOT EXISTS sms_notifications TINYINT(1) NOT NULL DEFAULT 1 AFTER last_login_at,
+    ADD COLUMN IF NOT EXISTS email_notifications TINYINT(1) NOT NULL DEFAULT 1 AFTER sms_notifications,
+    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+ALTER TABLE admin
+    ADD COLUMN IF NOT EXISTS first_name VARCHAR(100) NOT NULL AFTER admin_id,
+    ADD COLUMN IF NOT EXISTS last_name VARCHAR(100) NOT NULL AFTER first_name,
+    ADD COLUMN IF NOT EXISTS email VARCHAR(150) NOT NULL UNIQUE AFTER last_name,
+    ADD COLUMN IF NOT EXISTS password VARCHAR(255) NOT NULL AFTER email,
+    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+DROP TABLE IF EXISTS profile_documents;
+DROP TABLE IF EXISTS user_sessions;
+
+CREATE TABLE IF NOT EXISTS profile (
+    profile_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL UNIQUE,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    phone_number VARCHAR(15) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    address VARCHAR(255) NULL,
+    gender VARCHAR(20) NULL,
+    dob DATE NULL,
+    marital_status VARCHAR(50) NULL,
+    aadhaar_number VARCHAR(32) NULL,
+    aadhaar_last4 VARCHAR(4) NULL,
+    aadhaar_status VARCHAR(20) NOT NULL DEFAULT 'not_added',
+    pan_number VARCHAR(16) NULL,
+    pan_last4 VARCHAR(4) NULL,
+    pan_status VARCHAR(20) NOT NULL DEFAULT 'not_added',
+    title VARCHAR(100) NULL,
+    company VARCHAR(150) NULL,
+    designation VARCHAR(100) NULL,
+    employment_type VARCHAR(50) NULL,
+    experience VARCHAR(50) NULL,
+    income VARCHAR(50) NULL,
+    photo TEXT NULL,
+    completion_percent INT NULL,
+    city VARCHAR(100) NULL,
+    state VARCHAR(100) NULL,
+    pincode VARCHAR(20) NULL,
+    country VARCHAR(100) NULL,
+    bank_name VARCHAR(150) NULL,
+    account_mask VARCHAR(64) NULL,
+    ifsc_code VARCHAR(32) NULL,
+    branch VARCHAR(150) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_profile_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);

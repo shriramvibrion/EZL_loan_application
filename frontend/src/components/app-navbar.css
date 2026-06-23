@@ -1,0 +1,147 @@
+.app-navbar {
+	--app-nav-heading: #0a2255;
+	--app-nav-accent: #082b79;
+	--app-nav-link: #0546c7;
+	--app-nav-text: #102033;
+	--app-nav-text-secondary: #344054;
+	--app-nav-text-muted: #475467;
+	--app-nav-height: 64px;
+	position: sticky;
+	top: 0;
+	z-index: 40;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 14px;
+	min-height: var(--app-nav-height);
+	padding: 10px 40px;
+	background: rgba(255, 255, 255, 0.88);
+	border-bottom: 1px solid rgba(229, 231, 235, 0.72);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+}
+
+.app-brand,
+.app-navbar nav button,
+.app-nav-icon,
+.app-nav-avatar {
+	border: 0;
+	cursor: pointer;
+	font: inherit;
+}
+
+.app-brand {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 0;
+	background: transparent;
+	color: var(--app-nav-accent);
+	text-align: left;
+}
+
+.app-brand > span:first-child {
+	display: grid;
+	place-items: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 10px;
+	color: #fff;
+	background: var(--app-nav-accent);
+}
+
+.app-brand strong,
+.app-brand small {
+	display: block;
+}
+
+.app-brand strong {
+	color: var(--app-nav-accent);
+	font-size: 15px;
+	line-height: 1.2;
+	font-weight: 700;
+}
+
+.app-brand small {
+	color: #6b7280;
+	font-size: 11px;
+}
+
+.app-navbar nav {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin-inline: auto;
+}
+
+.app-navbar nav button {
+	padding: 8px 14px;
+	border-radius: 9px;
+	color: var(--app-nav-text-secondary);
+	background: transparent;
+	font-size: 13px;
+	font-weight: 600;
+	transition: background 0.2s ease, color 0.2s ease;
+}
+
+.app-navbar nav button:hover {
+	color: var(--app-nav-heading);
+	background: #eef3f9;
+}
+
+.app-navbar nav button.active {
+	color: var(--app-nav-heading);
+	background: #e8f1ff;
+	font-weight: 700;
+}
+
+.app-nav-actions {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 18px;
+}
+
+.app-nav-profile {
+	position: relative;
+}
+
+.app-nav-icon,
+.app-nav-avatar {
+	display: grid;
+	place-items: center;
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+}
+
+.app-nav-icon {
+	color: #344054;
+	background: transparent;
+}
+
+.app-nav-avatar {
+	color: #fff;
+	background: var(--app-nav-accent);
+	font-size: 13px;
+	font-weight: 700;
+}
+
+@media (max-width: 1100px) {
+	.app-navbar {
+		padding: 10px 22px;
+	}
+}
+
+@media (max-width: 760px) {
+	.app-navbar {
+		flex-wrap: wrap;
+	}
+
+	.app-navbar nav {
+		order: 3;
+		width: 100%;
+		justify-content: flex-start;
+		overflow-x: auto;
+	}
+}

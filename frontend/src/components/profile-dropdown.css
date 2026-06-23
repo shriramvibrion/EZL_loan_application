@@ -1,0 +1,35 @@
+.profile-dropdown {
+  position: fixed;
+  right: 20px;
+  top: 64px;
+  width: 280px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 10px 40px rgba(2,6,23,0.20);
+  z-index: 9999;
+  border: 1px solid rgba(255,255,255,0.6);
+}
+.pd-row { display:flex; gap:12px; align-items:center; padding:6px 4px }
+.pd-avatar { width:52px; height:52px; border-radius:50%; background:#eef2ff; color:#2b3a8a; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px; overflow:hidden; }
+.pd-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+.pd-name { font-weight:700 }
+/* small muted name removed */
+.pd-name {
+  font-weight: 700;
+  color: #0F172A;
+  font-size: 15px;
+  letter-spacing: 0.2px;
+}
+
+.pd-row { display:flex; gap:12px; align-items:center; padding:6px 4px }
+.pd-actions { margin-top:10px; display:flex; flex-direction:column; gap:8px }
+.pd-action { display:flex; align-items:center; gap:8px; background:transparent; border:none; padding:8px 10px; border-radius:8px; cursor:pointer; text-align:left }
+.pd-action:hover { background:rgba(16,24,40,0.04) }
+.pd-logout { color:#b91c1c }
+
+@media (max-width:900px) {
+  .profile-dropdown { right:12px; left:12px; top:72px }
+}

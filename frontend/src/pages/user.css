@@ -1,0 +1,222 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --user-primary: #2f67c8;
+  --user-primary-2: #4a84e8;
+  --user-home: #3f78d7;
+  --user-card: rgba(234, 238, 245, 0.94);
+  --user-input: #f6f8fb;
+  --user-border: #b7c7dc;
+  --user-text: #222833;
+  --user-muted: #4f5665;
+}
+
+.user-page {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  font-family: 'Manrope', 'Segoe UI', Tahoma, sans-serif;
+}
+
+.user-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.user-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, rgba(3, 18, 42, 0.38) 0%, rgba(255, 255, 255, 0.16) 60%, rgba(245, 247, 250, 0.14) 100%);
+  z-index: 1;
+}
+
+.user-container {
+  width: min(1120px, 100%);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 2;
+}
+
+.user-card {
+  width: min(80%, 400px);
+  border-radius: 20px;
+  background: var(--user-card);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 18px 40px rgba(32, 45, 66, 0.2);
+  backdrop-filter: blur(3px);
+  padding: 32px 30px 24px;
+}
+
+.user-header h1 {
+  margin: 0;
+  font-size: clamp(1.7rem, 2.2vw, 2.05rem);
+  color: var(--user-primary);
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.user-form {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.user-form input {
+  width: 100%;
+  height: 48px;
+  border-radius: 10px;
+  border: 1px solid var(--user-border);
+  background: var(--user-input);
+  color: var(--user-text);
+  padding: 12px 14px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-form input::placeholder {
+  color: #747b88;
+}
+
+.user-form input:focus {
+  outline: none;
+  border-color: #92b4e3;
+  box-shadow: 0 0 0 3px rgba(49, 116, 220, 0.14);
+}
+
+.password-wrap {
+  position: relative;
+  display: block;
+}
+
+.password-wrap input {
+  padding-right: 44px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle svg {
+  width: 18px;
+  height: 18px;
+  fill: #8993a3;
+}
+
+.password-toggle:hover svg,
+.password-toggle:focus-visible svg {
+  color: #8993a3;
+  fill: #5c6677;
+}
+
+.password-toggle:focus-visible {
+  outline: 2px solid rgba(49, 116, 220, 0.35);
+  border-radius: 6px;
+}
+
+.btn {
+  width: 100%;
+  height: 49px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 1.02rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn.primary1 {
+  background: linear-gradient(90deg, var(--user-primary-2), var(--user-primary));
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(47, 103, 200, 0.34);
+}
+
+.btn.neutral {
+  margin-top: 10px;
+  background: var(--user-home);
+  color: #5d0951;
+  border: 1px solid #2f67c8;
+  box-shadow: 0 8px 18px rgba(48, 108, 205, 0.24);
+}
+
+.user-footer {
+  margin-top: 12px;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.98rem;
+  color: var(--user-muted);
+  font-weight: 600;
+}
+
+.user-footer .link {
+  border: 0;
+  background: transparent;
+  color: #4e42b8;
+  text-decoration: underline;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+@media (max-width: 900px) {
+  .user-container {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 620px) {
+  .user-page {
+    padding: 18px;
+  }
+
+  .user-card {
+    width: 100%;
+    padding: 24px 18px 18px;
+    border-radius: 16px;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .btn,
+  .user-form input {
+    height: 46px;
+  }
+}
+.form-message.error{
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  text-transform: lowercase;
+  font-weight: 700;
+  color: #ff4d4d;
+}
