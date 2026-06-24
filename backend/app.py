@@ -19,8 +19,8 @@ def create_app():
 
     try:
         ensure_profile_tables()
-    except Exception:
-        pass
+    except Exception as e:
+        raise RuntimeError(f"❌ Database initialization failed: {e}") from e
 
     @app.get("/")
     def health_check():
