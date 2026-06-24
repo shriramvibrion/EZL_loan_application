@@ -38,8 +38,11 @@ def jwt_required(role='user'):
             except jwt.InvalidTokenError as e:
                 return jsonify({'error': f'invalid token: {str(e)}'}), 401
 
-            if role and payload.get('role') != role:
-                return jsonify({'error': 'forbidden: insufficient permissions'}), 403
+            # ✅ Bug #7 Fix: Support single role string OR a list of roles
+            if role:
+                allowed_roles = [role] if isinstance(role, str) else list(role)
+                if payload.get('role') not in allowed_roles:
+                    return jsonify({'error': 'forbidden: insufficient permissions'}), 403
 
             user_id = int(payload.get('sub', 0))
             if not user_id:
@@ -48,7 +51,9 @@ def jwt_required(role='user'):
             conn = get_db_connection()
             cursor = conn.cursor(dictionary=True)
             try:
-                if role == 'admin':
+                # ✅ Bug #7 Fix: Check the correct table based on actual token role
+                actual_role = payload.get('role')
+                if actual_role == 'admin':
                     cursor.execute('SELECT admin_id FROM admin WHERE admin_id = %s LIMIT 1', (user_id,))
                 else:
                     cursor.execute('SELECT user_id FROM users WHERE user_id = %s LIMIT 1', (user_id,))
@@ -60,6 +65,7 @@ def jwt_required(role='user'):
                 conn.close()
 
             g.current_user_id = int(user_id)
+            g.current_user_role = actual_role  # ✅ Bonus: store role in g for use in routes
             return view_func(*args, **kwargs)
         return wrapped
     return decorator

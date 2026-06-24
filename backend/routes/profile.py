@@ -430,7 +430,6 @@ def upsert_profile():
     if not user_row:
         return jsonify({'error': 'user not found'}), 404
 
-    # Frontend may send `phone`; map it to DB column `phone_number`.
     if 'phone' in data and 'phone_number' not in data:
         data['phone_number'] = data.get('phone')
     if 'title' in data and 'occupation' not in data:
@@ -492,50 +491,20 @@ def upsert_profile():
             data['pan_number'] = pan_number
             data['pan_last4'] = pan_number[-4:]
 
-    data['profile_locked'] = 1
-
     profile_fields = [
-        'first_name',
-        'last_name',
-        'phone_number',
-        'email',
-        'dob',
-        'age',
-        'address',
-        'street',
-        'city',
-        'state',
-        'pincode',
-        'country',
-        'gender',
-        'marital_status',
-        'emergency_contact_primary_name',
-        'emergency_contact_primary_relationship',
-        'emergency_contact_primary_phone',
-        'emergency_contact_secondary_name',
-        'emergency_contact_secondary_relationship',
-        'emergency_contact_secondary_phone',
-        'aadhaar_number',
-        'aadhaar_last4',
-        'aadhaar_status',
-        'pan_number',
-        'pan_last4',
-        'pan_status',
-        'aadhaar_file_name',
-        'pan_file_name',
-        'account_mask',
-        'ifsc_code',
-        'bank_name',
-        'branch',
-        'occupation',
-        'company',
-        'designation',
-        'employment_type',
-        'experience',
-        'income',
-        'profile_locked',
+        'first_name', 'last_name', 'phone_number', 'email', 'dob', 'age',
+        'address', 'street', 'city', 'state', 'pincode', 'country', 'gender',
+        'marital_status', 'emergency_contact_primary_name',
+        'emergency_contact_primary_relationship', 'emergency_contact_primary_phone',
+        'emergency_contact_secondary_name', 'emergency_contact_secondary_relationship',
+        'emergency_contact_secondary_phone', 'aadhaar_number', 'aadhaar_last4',
+        'aadhaar_status', 'pan_number', 'pan_last4', 'pan_status',
+        'aadhaar_file_name', 'pan_file_name', 'account_mask', 'ifsc_code',
+        'bank_name', 'branch', 'occupation', 'company', 'designation',
+        'employment_type', 'experience', 'income', 'profile_locked',
     ]
 
+    # Build incoming_profile from submitted data
     incoming_profile = {}
     for field in profile_fields:
         if field in data:
@@ -573,6 +542,14 @@ def upsert_profile():
                     for protected_field in protected_fields:
                         incoming_profile.pop(protected_field, None)
 
+        # ✅ Bug #8 Fix: Lock profile only when all required fields are filled
+        required_fields = ['first_name', 'last_name', 'email', 'phone_number',
+                           'gender', 'dob', 'aadhaar_number', 'pan_number']
+        current_profile = {**(existing or {}), **incoming_profile}
+        all_filled = all(current_profile.get(f) for f in required_fields)
+        if all_filled:
+            incoming_profile['profile_locked'] = 1
+
         if existing:
             if incoming_profile:
                 set_clause = ', '.join([f"{k} = %s" for k in incoming_profile.keys()])
@@ -606,9 +583,7 @@ def upsert_profile():
                 tuple(insert_values),
             )
 
-        # Keep canonical user fields in sync when they are provided.
         user_updates = {}
-
         if 'last_login_at' in data:
             user_updates['last_login_at'] = _normalize(data.get('last_login_at'))
 
@@ -635,7 +610,192 @@ def upsert_profile():
     updated_profile = _fetch_profile(user_id)
     updated_user = _fetch_user(user_id)
     return jsonify(_profile_payload(updated_profile, updated_user))
+    data = request.get_json() or {}
+    user_id = g.current_user_id
+    user_row = _fetch_user(user_id)
+    if not user_row:
+        return jsonify({'error': 'user not found'}), 404
 
+    if 'phone' in data and 'phone_number' not in data:
+        data['phone_number'] = data.get('phone')
+    if 'title' in data and 'occupation' not in data:
+        data['occupation'] = data.get('title')
+    contact_aliases = {
+        'primary_contact_name': 'emergency_contact_primary_name',
+        'primary_contact_relationship': 'emergency_contact_primary_relationship',
+        'primary_contact_phone': 'emergency_contact_primary_phone',
+        'secondary_contact_name': 'emergency_contact_secondary_name',
+        'secondary_contact_relationship': 'emergency_contact_secondary_relationship',
+        'secondary_contact_phone': 'emergency_contact_secondary_phone',
+    }
+    for alias, column in contact_aliases.items():
+        alias_value = _normalize(data.get(alias))
+        if alias_value is not None:
+            data[column] = alias_value
+
+    if any(field in data for field in ['street', 'city', 'state', 'pincode', 'country']) and 'address' not in data:
+        data['address'] = _compact_address(
+            data.get('street'),
+            data.get('city'),
+            data.get('state'),
+            data.get('pincode'),
+            data.get('country'),
+        )
+
+    calculated_age = _calculate_age(data.get('dob'))
+    if calculated_age is not None:
+        data['age'] = calculated_age
+
+    if data.get('ifsc_code') and (not data.get('bank_name') or not data.get('branch')):
+        normalized_ifsc = _normalize(data.get('ifsc_code'))
+        if normalized_ifsc:
+            normalized_ifsc = normalized_ifsc.upper()
+            data['ifsc_code'] = normalized_ifsc
+            if IFSC_PATTERN.fullmatch(normalized_ifsc):
+                try:
+                    ifsc_data = _lookup_ifsc(normalized_ifsc)
+                    data['bank_name'] = data.get('bank_name') or ifsc_data.get('BANK') or ifsc_data.get('BANKNAME')
+                    data['branch'] = data.get('branch') or ifsc_data.get('BRANCH')
+                except Exception:
+                    pass
+
+    if data.get('aadhaar_number') and str(data.get('aadhaar_number')).upper().startswith('XXXX'):
+        data.pop('aadhaar_number', None)
+
+    if data.get('pan_number') and str(data.get('pan_number')).upper().startswith('XXXX'):
+        data.pop('pan_number', None)
+
+    if data.get('aadhaar_number'):
+        aadhaar_number = re.sub(r'\D', '', str(data.get('aadhaar_number')))
+        if len(aadhaar_number) >= 4:
+            data['aadhaar_number'] = aadhaar_number
+            data['aadhaar_last4'] = aadhaar_number[-4:]
+
+    if data.get('pan_number'):
+        pan_number = str(data.get('pan_number')).upper().replace(' ', '')
+        if len(pan_number) >= 4:
+            data['pan_number'] = pan_number
+            data['pan_last4'] = pan_number[-4:]
+
+    profile_fields = [
+        'first_name', 'last_name', 'phone_number', 'email', 'dob', 'age',
+        'address', 'street', 'city', 'state', 'pincode', 'country', 'gender',
+        'marital_status', 'emergency_contact_primary_name',
+        'emergency_contact_primary_relationship', 'emergency_contact_primary_phone',
+        'emergency_contact_secondary_name', 'emergency_contact_secondary_relationship',
+        'emergency_contact_secondary_phone', 'aadhaar_number', 'aadhaar_last4',
+        'aadhaar_status', 'pan_number', 'pan_last4', 'pan_status',
+        'aadhaar_file_name', 'pan_file_name', 'account_mask', 'ifsc_code',
+        'bank_name', 'branch', 'occupation', 'company', 'designation',
+        'employment_type', 'experience', 'income', 'profile_locked',
+    ]
+
+    # Build incoming_profile from submitted data
+    incoming_profile = {}
+    for field in profile_fields:
+        if field in data:
+            incoming_profile[field] = _normalize(data.get(field))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            """
+            SELECT profile_id, profile_locked, dob, aadhaar_number, aadhaar_last4,
+                   pan_number, pan_last4, account_mask, ifsc_code
+            FROM profile
+            WHERE user_id = %s
+            LIMIT 1
+            """,
+            (user_id,),
+        )
+        existing = cursor.fetchone()
+
+        if existing:
+            for inherited_field in ['first_name', 'last_name', 'phone_number', 'email']:
+                incoming_profile.pop(inherited_field, None)
+            write_once_fields = {
+                'dob': ['dob', 'age'],
+                'aadhaar_number': ['aadhaar_number', 'aadhaar_last4'],
+                'aadhaar_last4': ['aadhaar_number', 'aadhaar_last4'],
+                'pan_number': ['pan_number', 'pan_last4'],
+                'pan_last4': ['pan_number', 'pan_last4'],
+                'account_mask': ['account_mask'],
+                'ifsc_code': ['ifsc_code', 'bank_name', 'branch'],
+            }
+            for source_field, protected_fields in write_once_fields.items():
+                if existing.get(source_field):
+                    for protected_field in protected_fields:
+                        incoming_profile.pop(protected_field, None)
+
+        # ✅ Bug #8 Fix: Lock profile only when all required fields are filled
+        required_fields = ['first_name', 'last_name', 'email', 'phone_number',
+                           'gender', 'dob', 'aadhaar_number', 'pan_number']
+        current_profile = {**(existing or {}), **incoming_profile}
+        all_filled = all(current_profile.get(f) for f in required_fields)
+        if all_filled:
+            incoming_profile['profile_locked'] = 1
+
+        if existing:
+            if incoming_profile:
+                set_clause = ', '.join([f"{k} = %s" for k in incoming_profile.keys()])
+                query = f"UPDATE profile SET {set_clause} WHERE user_id = %s"
+                cursor.execute(query, (*incoming_profile.values(), user_id))
+        else:
+            seed = {
+                'first_name': user_row.get('first_name'),
+                'last_name': user_row.get('last_name'),
+                'phone_number': user_row.get('phone_number'),
+                'email': user_row.get('email'),
+                'address': user_row.get('address'),
+                'gender': user_row.get('gender'),
+                'aadhaar_number': user_row.get('aadhaar_number'),
+                'aadhaar_status': user_row.get('aadhaar_status'),
+                'pan_number': user_row.get('pan_number'),
+                'pan_status': user_row.get('pan_status'),
+            }
+            seed.update(incoming_profile)
+
+            required = ['first_name', 'last_name', 'phone_number', 'email']
+            missing_required = [k for k in required if not seed.get(k)]
+            if missing_required:
+                return jsonify({'error': f"missing required fields: {', '.join(missing_required)}"}), 400
+
+            insert_columns = ['user_id'] + profile_fields
+            insert_values = [user_id] + [seed.get(col) for col in profile_fields]
+            placeholders = ', '.join(['%s'] * len(insert_columns))
+            cursor.execute(
+                f"INSERT INTO profile ({', '.join(insert_columns)}) VALUES ({placeholders})",
+                tuple(insert_values),
+            )
+
+        user_updates = {}
+        if 'last_login_at' in data:
+            user_updates['last_login_at'] = _normalize(data.get('last_login_at'))
+
+        notifications = data.get('notifications')
+        if isinstance(notifications, dict):
+            if 'sms' in notifications:
+                user_updates['sms_notifications'] = int(bool(notifications.get('sms')))
+            if 'email' in notifications:
+                user_updates['email_notifications'] = int(bool(notifications.get('email')))
+
+        if user_updates:
+            user_set_clause = ', '.join([f"{k} = %s" for k in user_updates.keys()])
+            user_query = f"UPDATE users SET {user_set_clause} WHERE user_id = %s"
+            cursor.execute(user_query, (*user_updates.values(), user_id))
+
+        conn.commit()
+    except Exception as exc:
+        conn.rollback()
+        return jsonify({'error': str(exc)}), 400
+    finally:
+        cursor.close()
+        conn.close()
+
+    updated_profile = _fetch_profile(user_id)
+    updated_user = _fetch_user(user_id)
+    return jsonify(_profile_payload(updated_profile, updated_user))
 
 @profile_bp.post('/api/profile/document')
 @jwt_required('user')

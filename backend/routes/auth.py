@@ -63,7 +63,6 @@ def register_user():
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    created_user = True
     try:
         cursor.execute(
             "INSERT INTO users (first_name, last_name, email, phone_number, password) VALUES (%s,%s,%s,%s,%s)",
@@ -80,17 +79,9 @@ def register_user():
         existing_user = cursor.fetchone()
         if not existing_user:
             return jsonify({'error': str(e)}), 400
-        user_id = existing_user['user_id']
-        created_user = False
-        try:
-            cursor.execute(
-                "UPDATE users SET first_name = %s, last_name = %s, email = %s, phone_number = %s, password = %s WHERE user_id = %s",
-                (data['first_name'], data['last_name'], data['email'], phone_number, pw_hash, user_id),
-            )
-            conn.commit()
-        except Exception as update_error:
-            conn.rollback()
-            return jsonify({'error': str(update_error)}), 400
+
+        # ✅ Bug #6 Fix: Return 409 instead of overwriting the existing user
+        return jsonify({'error': 'An account with this email or phone number already exists'}), 409
     finally:
         cursor.close()
         conn.close()
@@ -109,7 +100,7 @@ def register_user():
         cursor.close()
         conn.close()
 
-    return jsonify({'user_id': user_id, 'token': token, 'profile': build_profile_snapshot(user_row, profile_row)}), 201 if created_user else 200
+    return jsonify({'user_id': user_id, 'token': token, 'profile': build_profile_snapshot(user_row, profile_row)}), 201
 
 
 @auth_bp.route('/api/login', methods=['POST'])

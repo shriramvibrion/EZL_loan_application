@@ -666,16 +666,48 @@ export default function Profile() {
                               disabled={!canEditProfile}
                             >
                               <option value="" disabled>Select state</option>
-                              <option value="Karnataka">Karnataka</option>
-                              <option value="Maharashtra">Maharashtra</option>
-                              <option value="Tamil Nadu">Tamil Nadu</option>
-                              <option value="Delhi">Delhi</option>
-                              <option value="Gujarat">Gujarat</option>
-                              <option value="West Bengal">West Bengal</option>
-                              <option value="Telangana">Telangana</option>
-                              <option value="Andhra Pradesh">Andhra Pradesh</option>
-                              <option value="Uttar Pradesh">Uttar Pradesh</option>
-                              <option value="Other">Other</option>
+                              {[
+    'Andhra Pradesh',
+    'Arunachal Pradesh',
+    'Assam',
+    'Bihar',
+    'Chhattisgarh',
+    'Goa',
+    'Gujarat',
+    'Haryana',
+    'Himachal Pradesh',
+    'Jharkhand',
+    'Karnataka',
+    'Kerala',
+    'Madhya Pradesh',
+    'Maharashtra',
+    'Manipur',
+    'Meghalaya',
+    'Mizoram',
+    'Nagaland',
+    'Odisha',
+    'Punjab',
+    'Rajasthan',
+    'Sikkim',
+    'Tamil Nadu',
+    'Telangana',
+    'Tripura',
+    'Uttar Pradesh',
+    'Uttarakhand',
+    'West Bengal',
+    'Andaman and Nicobar Islands',
+    'Chandigarh',
+    'Dadra and Nagar Haveli and Daman and Diu',
+    'Delhi',
+    'Jammu and Kashmir',
+    'Ladakh',
+    'Lakshadweep',
+    'Puducherry',
+  ].map((state) => (
+    <option key={state} value={state}>
+      {state}
+    </option>
+  ))}
                             </select>
                           </label>
                           <label className="profile-input-label">
