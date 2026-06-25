@@ -577,7 +577,7 @@ export default function Profile() {
             </div>
 
             <div className="profile-top-actions">
-              {canEditProfile ? (
+              {isEditing ? (
                 <button type="button" className="profile-primary-btn" onClick={saveProfile} disabled={saving}>
                   {saving ? 'Saving...' : 'Save Profile'}
                 </button>
