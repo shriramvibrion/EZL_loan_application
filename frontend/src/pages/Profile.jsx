@@ -18,7 +18,7 @@ import {
 } from '@tabler/icons-react'
 import './profile.css'
 import AppNavbar from '../components/AppNavbar'
-import { getProfile, lookupIfsc, updateProfile, uploadProfileDocument } from '../api/profile'
+import { getProfile, lookupIfsc, updateProfile, uploadProfileDocument, changePassword, openDocumentInNewTab } from '../api/profile'
 
 const SIDEBAR_LINKS = [
   { label: 'Dashboard', icon: IconMenu2 },
@@ -209,6 +209,8 @@ export default function Profile() {
   const [documentUploading, setDocumentUploading] = useState(null)
   const [ifscLookupLoading, setIfscLookupLoading] = useState(false)
   const [lastLookedUpIfsc, setLastLookedUpIfsc] = useState('')
+  const [passwordForm, setPasswordForm] = useState({ current: '', newPw: '', confirm: '' })
+  const [passwordSaving, setPasswordSaving] = useState(false)
   const fileRef = useRef(null)
   const aadhaarInputRef = useRef(null)
   const panInputRef = useRef(null)
@@ -398,6 +400,39 @@ export default function Profile() {
   const completion = useMemo(() => getCompletion(formValues), [formValues])
   const customerSince = useMemo(() => formatDate(formValues?.created_at || formValues?.joined_at), [formValues])
 
+  const handleChangePassword = async () => {
+    if (!passwordForm.current || !passwordForm.newPw) {
+      setToast({ type: 'error', message: 'Please fill in all password fields' })
+      return
+    }
+    if (passwordForm.newPw.length < 8) {
+      setToast({ type: 'error', message: 'New password must be at least 8 characters' })
+      return
+    }
+    if (passwordForm.newPw !== passwordForm.confirm) {
+      setToast({ type: 'error', message: 'New passwords do not match' })
+      return
+    }
+    setPasswordSaving(true)
+    try {
+      await changePassword({ current_password: passwordForm.current, new_password: passwordForm.newPw })
+      setToast({ type: 'success', message: 'Password updated successfully' })
+      setPasswordForm({ current: '', newPw: '', confirm: '' })
+    } catch (err) {
+      setToast({ type: 'error', message: err.message || 'Failed to update password' })
+    } finally {
+      setPasswordSaving(false)
+    }
+  }
+
+  const handleViewDocument = async (docType) => {
+    try {
+      await openDocumentInNewTab(docType)
+    } catch (err) {
+      setToast({ type: 'error', message: err.message || 'Could not open document' })
+    }
+  }
+
   const openPhotoPicker = () => {
     fileRef.current?.click()
   }
@@ -416,6 +451,8 @@ export default function Profile() {
           const photoKey = getPhotoStorageKey(next)
           if (photoKey) localStorage.setItem(photoKey, photo)
           localStorage.setItem('user_profile', JSON.stringify(next))
+          // Notify AppNavbar in the same tab
+          window.dispatchEvent(new Event('profile-photo-updated'))
         } catch {
           // ignore storage issues
         }
@@ -910,7 +947,7 @@ export default function Profile() {
                         ) : null}
                       </div>
                       {aadhaarFileName ? (
-                        <button type="button" className="profile-view-doc-btn" aria-label="View Aadhaar document">
+                        <button type="button" className="profile-view-doc-btn" aria-label="View Aadhaar document" onClick={() => handleViewDocument('aadhaar')}>
                           <IconEye size={18} />
                         </button>
                       ) : null}
@@ -974,7 +1011,7 @@ export default function Profile() {
                         ) : null}
                       </div>
                       {panFileName ? (
-                        <button type="button" className="profile-view-doc-btn" aria-label="View PAN document">
+                        <button type="button" className="profile-view-doc-btn" aria-label="View PAN document" onClick={() => handleViewDocument('pan')}>
                           <IconEye size={18} />
                         </button>
                       ) : null}
@@ -1145,14 +1182,40 @@ export default function Profile() {
                 <div className="profile-password-grid">
                   <label>
                     <span>Current Password</span>
-                    <input type="password" placeholder="••••••••" />
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      value={passwordForm.current}
+                      onChange={(e) => setPasswordForm((p) => ({ ...p, current: e.target.value }))}
+                    />
                   </label>
                   <label>
                     <span>New Password</span>
-                    <input type="password" placeholder="••••••••" />
+                    <input
+                      type="password"
+                      placeholder="Min. 8 characters"
+                      value={passwordForm.newPw}
+                      onChange={(e) => setPasswordForm((p) => ({ ...p, newPw: e.target.value }))}
+                    />
+                  </label>
+                  <label>
+                    <span>Confirm New Password</span>
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      value={passwordForm.confirm}
+                      onChange={(e) => setPasswordForm((p) => ({ ...p, confirm: e.target.value }))}
+                    />
                   </label>
                 </div>
-                <button type="button" className="profile-primary-btn">Update Password</button>
+                <button
+                  type="button"
+                  className="profile-primary-btn"
+                  onClick={handleChangePassword}
+                  disabled={passwordSaving}
+                >
+                  {passwordSaving ? 'Updating...' : 'Update Password'}
+                </button>
               </article>
 
               <div className="profile-security-grid">

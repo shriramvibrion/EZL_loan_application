@@ -74,3 +74,23 @@ export function revokeProfileSession(sessionId) {
 export function updateProfileNotifications(payload) {
   return request('/api/profile/notifications', { method: 'PUT', body: payload })
 }
+
+export function changePassword(payload) {
+  return request('/api/profile/change-password', { method: 'PUT', body: payload })
+}
+
+export async function openDocumentInNewTab(docType) {
+  const token = localStorage.getItem('user_token')
+  if (!token) throw new Error('Please log in to continue')
+  const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+  const response = await fetch(`${base}/api/profile/document/${docType}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}))
+    throw new Error(data.error || 'Could not load document')
+  }
+  const blob = await response.blob()
+  const url = URL.createObjectURL(blob)
+  window.open(url, '_blank')
+}

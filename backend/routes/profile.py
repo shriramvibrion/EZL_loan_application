@@ -954,3 +954,86 @@ def update_notifications():
     synced_profile = sync_profile_from_user(g.current_user_id)
     user_row = _fetch_user(g.current_user_id)
     return jsonify(_profile_payload(synced_profile, user_row))
+
+
+# ─────────────────────────────────────────────────────────
+#  Change Password
+# ─────────────────────────────────────────────────────────
+
+@profile_bp.put('/api/profile/change-password')
+@jwt_required('user')
+def change_password():
+    from werkzeug.security import check_password_hash, generate_password_hash
+    data = request.get_json() or {}
+    current_password = data.get('current_password', '').strip()
+    new_password = data.get('new_password', '').strip()
+
+    if not current_password or not new_password:
+        return jsonify({'error': 'current_password and new_password are required'}), 400
+
+    if len(new_password) < 8:
+        return jsonify({'error': 'new password must be at least 8 characters'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute('SELECT password FROM users WHERE user_id = %s', (g.current_user_id,))
+        user = cursor.fetchone()
+        if not user:
+            return jsonify({'error': 'user not found'}), 404
+
+        if not check_password_hash(user['password'], current_password):
+            return jsonify({'error': 'current password is incorrect'}), 401
+
+        new_hash = generate_password_hash(new_password)
+        cursor.execute(
+            'UPDATE users SET password = %s WHERE user_id = %s',
+            (new_hash, g.current_user_id),
+        )
+        conn.commit()
+    except Exception as exc:
+        conn.rollback()
+        return jsonify({'error': str(exc)}), 400
+    finally:
+        cursor.close()
+        conn.close()
+
+    return jsonify({'message': 'password updated successfully'}), 200
+
+
+# ─────────────────────────────────────────────────────────
+#  Serve uploaded document (view in new tab)
+# ─────────────────────────────────────────────────────────
+
+@profile_bp.get('/api/profile/document/<doc_type>')
+@jwt_required('user')
+def view_profile_document(doc_type):
+    from flask import send_from_directory
+    if doc_type not in DOCUMENT_TYPES:
+        return jsonify({'error': 'invalid document type'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        column = f'{doc_type}_file_name'
+        cursor.execute(f'SELECT {column} FROM profile WHERE user_id = %s', (g.current_user_id,))
+        row = cursor.fetchone()
+    finally:
+        cursor.close()
+        conn.close()
+
+    if not row or not row.get(column):
+        return jsonify({'error': 'document not found'}), 404
+
+    file_name = row[column]
+    uploads = _uploads_dir()
+    file_path = os.path.join(uploads, file_name)
+
+    if not os.path.exists(file_path):
+        return jsonify({'error': 'file not found on server'}), 404
+
+    # Determine mime type for inline display
+    ext = os.path.splitext(file_name)[1].lower()
+    mime = 'application/pdf' if ext == '.pdf' else 'image/jpeg' if ext in ('.jpg', '.jpeg') else 'image/png' if ext == '.png' else 'application/octet-stream'
+
+    return send_from_directory(uploads, file_name, mimetype=mime, as_attachment=False)

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { IconBell, IconBuildingBank } from '@tabler/icons-react'
 import ProfileDropdown from './ProfileDropdown'
 import './app-navbar.css'
@@ -29,8 +29,18 @@ function getInitials(profile) {
 
 export default function AppNavbar({ activePage = 'information' }) {
 	const [profileOpen, setProfileOpen] = useState(false)
-	const profile = useMemo(() => readCachedProfile(), [])
+	const [profile, setProfile] = useState(() => readCachedProfile())
 	const initials = getInitials(profile)
+
+	useEffect(() => {
+		const refresh = () => setProfile(readCachedProfile())
+		window.addEventListener('storage', refresh)
+		window.addEventListener('profile-photo-updated', refresh)
+		return () => {
+			window.removeEventListener('storage', refresh)
+			window.removeEventListener('profile-photo-updated', refresh)
+		}
+	}, [])
 
 	const navigate = (href) => {
 		if (href) window.location.hash = href
@@ -65,7 +75,9 @@ export default function AppNavbar({ activePage = 'information' }) {
 				</button>
 				<div className="app-nav-profile">
 					<button type="button" className="app-nav-avatar" onClick={() => setProfileOpen((open) => !open)}>
-						{initials}
+						{profile?.photo
+							? <img src={profile.photo} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+							: initials}
 					</button>
 					<ProfileDropdown open={profileOpen} onClose={() => setProfileOpen(false)} />
 				</div>
