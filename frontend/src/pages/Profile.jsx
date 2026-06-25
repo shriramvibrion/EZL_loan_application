@@ -254,7 +254,7 @@ export default function Profile() {
           // ignore storage issues
         }
         setProfile(merged)
-        setIsEditing(!merged.profile_locked)
+        setIsEditing(false)
         setAadhaarFileName(merged.aadhaar_file_name || '')
         setPanFileName(merged.pan_file_name || '')
         setFormValues(toFormValues({
@@ -275,7 +275,7 @@ export default function Profile() {
             if (cached) {
               const parsed = JSON.parse(cached)
               setProfile(parsed)
-              setIsEditing(!parsed.profile_locked)
+              setIsEditing(false)
               setAadhaarFileName(parsed.aadhaar_file_name || '')
               setPanFileName(parsed.pan_file_name || '')
             }
