@@ -474,16 +474,30 @@ export default function Profile() {
       const data = await uploadProfileDocument(formData)
       const updatedProfile = data.profile || {}
 
+      const fileNameKey = documentType === 'aadhaar' ? 'aadhaar_file_name' : 'pan_file_name'
+      const fileName = data.file_name || updatedProfile[fileNameKey] || ''
+
       if (documentType === 'aadhaar') {
-        setAadhaarFileName(data.file_name || updatedProfile.aadhaar_file_name || '')
+        setAadhaarFileName(fileName)
       } else {
-        setPanFileName(data.file_name || updatedProfile.pan_file_name || '')
+        setPanFileName(fileName)
       }
 
-      setProfile(updatedProfile)
-      setFormValues((current) => ({ ...current, ...updatedProfile }))
-      localStorage.setItem('user_profile', JSON.stringify(updatedProfile))
-      setToast({ type: 'success', message: `${data.file_name} uploaded` })
+      // Only merge the file-name field back — do NOT overwrite unsaved form values
+      // with the server response (which only has DB-saved data, not what the user typed)
+      setProfile((current) => ({ ...(current || {}), [fileNameKey]: fileName }))
+      setFormValues((current) => ({ ...current, [fileNameKey]: fileName }))
+
+      // Keep localStorage in sync with file name only
+      try {
+        const cached = localStorage.getItem('user_profile')
+        const parsed = cached ? JSON.parse(cached) : {}
+        localStorage.setItem('user_profile', JSON.stringify({ ...parsed, [fileNameKey]: fileName }))
+      } catch {
+        // ignore
+      }
+
+      setToast({ type: 'success', message: `${fileName} uploaded` })
     } catch (error) {
       setToast({ type: 'error', message: error.message || 'Unable to upload document' })
     } finally {
