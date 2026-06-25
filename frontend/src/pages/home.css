@@ -162,6 +162,26 @@
   background: #1d4ed8;
 }
 
+.verifier-cta {
+  background: #0d9488;
+  box-shadow: 0 14px 28px rgba(13, 148, 136, 0.26);
+}
+
+.verifier-cta:hover {
+  background: #0f766e;
+  box-shadow: 0 18px 32px rgba(13, 148, 136, 0.38);
+}
+
+.disburser-cta {
+  background: #d97706;
+  box-shadow: 0 14px 28px rgba(217, 119, 6, 0.26);
+}
+
+.disburser-cta:hover {
+  background: #b45309;
+  box-shadow: 0 18px 32px rgba(217, 119, 6, 0.38);
+}
+
 .admin-cta {
   background: #4f46e5;
   box-shadow: 0 14px 28px rgba(79, 70, 229, 0.24);

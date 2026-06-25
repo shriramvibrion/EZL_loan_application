@@ -29,3 +29,11 @@ export function loginUser(payload) {
 export function loginAdmin(payload) {
 	return request('/api/admin/login', payload)
 }
+
+export function loginVerifier(payload) {
+	return request('/api/verifier/login', payload)
+}
+
+export function loginDisburser(payload) {
+	return request('/api/disburser/login', payload)
+}

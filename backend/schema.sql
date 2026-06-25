@@ -89,3 +89,41 @@ CREATE TABLE IF NOT EXISTS profile (
 -- sample selects
 SELECT * FROM users;
 SELECT * FROM admin;
+
+-- ─────────────────────────────────────────────────────────
+--  Verifier table
+--  Created by admin; no self-registration allowed.
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS verifiers (
+    verifier_id   INT PRIMARY KEY AUTO_INCREMENT,
+    first_name    VARCHAR(100)  NOT NULL,
+    last_name     VARCHAR(100)  NOT NULL,
+    email         VARCHAR(150)  NOT NULL UNIQUE,
+    password      VARCHAR(255)  NOT NULL,
+    -- Status: active | inactive (admin can deactivate)
+    status        VARCHAR(20)   NOT NULL DEFAULT 'active',
+    created_by    INT           NULL COMMENT 'admin_id who created this verifier',
+    created_at    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    updated_at    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    last_login_at DATETIME      NULL,
+    CONSTRAINT fk_verifier_created_by FOREIGN KEY (created_by) REFERENCES admin(admin_id) ON DELETE SET NULL
+);
+
+-- ─────────────────────────────────────────────────────────
+--  Disbursement Officers table
+--  Created by admin; no self-registration allowed.
+-- ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS disbursement_officers (
+    disburser_id  INT PRIMARY KEY AUTO_INCREMENT,
+    first_name    VARCHAR(100)  NOT NULL,
+    last_name     VARCHAR(100)  NOT NULL,
+    email         VARCHAR(150)  NOT NULL UNIQUE,
+    password      VARCHAR(255)  NOT NULL,
+    -- Status: active | inactive (admin can deactivate)
+    status        VARCHAR(20)   NOT NULL DEFAULT 'active',
+    created_by    INT           NULL COMMENT 'admin_id who created this officer',
+    created_at    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    updated_at    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    last_login_at DATETIME      NULL,
+    CONSTRAINT fk_disburser_created_by FOREIGN KEY (created_by) REFERENCES admin(admin_id) ON DELETE SET NULL
+);

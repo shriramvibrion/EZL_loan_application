@@ -1,0 +1,236 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --v-teal: #0d9488;
+  --v-teal-2: #14b8a6;
+  --v-card: rgba(233, 245, 244, 0.95);
+  --v-input: #edf7f6;
+  --v-border: #a7d9d5;
+  --v-text: #1e2533;
+  --v-muted: #4b7a76;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body,
+html,
+#root {
+  height: 100%;
+}
+
+.verifier-page {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  font-family: 'Manrope', 'Segoe UI', Tahoma, sans-serif;
+}
+
+.verifier-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.verifier-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    106deg,
+    rgba(5, 28, 25, 0.4) 0%,
+    rgba(255, 255, 255, 0.16) 58%,
+    rgba(240, 253, 250, 0.1) 100%
+  );
+}
+
+.verifier-container {
+  width: min(1120px, 100%);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 2;
+}
+
+.verifier-card {
+  width: min(80%, 400px);
+  border-radius: 22px;
+  background: var(--v-card);
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  box-shadow: 0 20px 44px rgba(13, 100, 90, 0.22);
+  backdrop-filter: blur(3px);
+  padding: 34px 30px 24px;
+}
+
+.verifier-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--v-teal-2), var(--v-teal));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3);
+}
+
+.verifier-badge svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.verifier-header h1 {
+  margin: 0;
+  font-size: clamp(1.9rem, 2.5vw, 2.2rem);
+  line-height: 1.1;
+  color: var(--v-teal);
+  font-weight: 800;
+}
+
+.verifier-header p {
+  margin: 12px 0 0;
+  color: var(--v-muted);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.verifier-form {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.verifier-form input {
+  width: 100%;
+  height: 48px;
+  border-radius: 10px;
+  border: 1px solid var(--v-border);
+  background: var(--v-input);
+  color: var(--v-text);
+  padding: 12px 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.verifier-form input::placeholder {
+  color: #7aa9a5;
+}
+
+.verifier-form input:focus {
+  outline: none;
+  border-color: var(--v-teal-2);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.18);
+}
+
+.password-wrap {
+  position: relative;
+  display: block;
+}
+
+.password-wrap input {
+  padding-right: 44px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle svg {
+  width: 18px;
+  height: 18px;
+  fill: #7aa9a5;
+}
+
+.password-toggle:hover svg,
+.password-toggle:focus-visible svg {
+  fill: #3d7a74;
+}
+
+.btn {
+  width: 100%;
+  height: 49px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn.primary {
+  background: linear-gradient(90deg, var(--v-teal-2), var(--v-teal));
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(13, 148, 136, 0.34);
+}
+
+.btn.primary:hover {
+  background: linear-gradient(90deg, var(--v-teal), #0a7a70);
+}
+
+.btn.primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btn.neutral {
+  margin-top: 10px;
+  background: #f1f3f7;
+  color: #0a5952;
+  border: 1px solid #c2dbd8;
+}
+
+.form-message.error {
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  text-transform: lowercase;
+  font-weight: 700;
+  color: #ff4d4d;
+}
+
+@media (max-width: 900px) {
+  .verifier-container {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 620px) {
+  .verifier-page {
+    padding: 16px;
+  }
+
+  .verifier-card {
+    width: 100%;
+    padding: 24px 18px 18px;
+    border-radius: 16px;
+  }
+
+  .verifier-form input,
+  .btn {
+    height: 46px;
+  }
+}

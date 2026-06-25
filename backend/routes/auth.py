@@ -184,3 +184,97 @@ def login_admin():
     token = create_token({'sub': admin['admin_id'], 'role': 'admin'})
 
     return jsonify({'admin_id': admin['admin_id'], 'token': token}), 200
+
+
+# ─────────────────────────────────────────────────────────
+#  Verifier Auth
+# ─────────────────────────────────────────────────────────
+
+@auth_bp.route('/api/verifier/login', methods=['POST'])
+def login_verifier():
+    data = request.get_json() or {}
+    if not data.get('email') or not data.get('password'):
+        return jsonify({'error': 'missing credentials'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT * FROM verifiers WHERE email = %s', (data['email'],))
+    verifier = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not verifier:
+        return jsonify({'error': 'invalid credentials'}), 401
+
+    if verifier.get('status') != 'active':
+        return jsonify({'error': 'account is inactive; contact admin'}), 403
+
+    if not check_password_hash(verifier['password'], data['password']):
+        return jsonify({'error': 'invalid credentials'}), 401
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            'UPDATE verifiers SET last_login_at = CURRENT_TIMESTAMP WHERE verifier_id = %s',
+            (verifier['verifier_id'],)
+        )
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
+    token = create_access_token(verifier['verifier_id'], 'verifier')
+    return jsonify({
+        'verifier_id': verifier['verifier_id'],
+        'token': token,
+        'name': f"{verifier['first_name']} {verifier['last_name']}",
+        'email': verifier['email'],
+    }), 200
+
+
+# ─────────────────────────────────────────────────────────
+#  Disbursement Officer Auth
+# ─────────────────────────────────────────────────────────
+
+@auth_bp.route('/api/disburser/login', methods=['POST'])
+def login_disburser():
+    data = request.get_json() or {}
+    if not data.get('email') or not data.get('password'):
+        return jsonify({'error': 'missing credentials'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT * FROM disbursement_officers WHERE email = %s', (data['email'],))
+    officer = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not officer:
+        return jsonify({'error': 'invalid credentials'}), 401
+
+    if officer.get('status') != 'active':
+        return jsonify({'error': 'account is inactive; contact admin'}), 403
+
+    if not check_password_hash(officer['password'], data['password']):
+        return jsonify({'error': 'invalid credentials'}), 401
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            'UPDATE disbursement_officers SET last_login_at = CURRENT_TIMESTAMP WHERE disburser_id = %s',
+            (officer['disburser_id'],)
+        )
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
+    token = create_access_token(officer['disburser_id'], 'disburser')
+    return jsonify({
+        'disburser_id': officer['disburser_id'],
+        'token': token,
+        'name': f"{officer['first_name']} {officer['last_name']}",
+        'email': officer['email'],
+    }), 200

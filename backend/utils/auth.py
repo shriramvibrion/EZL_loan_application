@@ -51,10 +51,14 @@ def jwt_required(role='user'):
             conn = get_db_connection()
             cursor = conn.cursor(dictionary=True)
             try:
-                # ✅ Bug #7 Fix: Check the correct table based on actual token role
+                # Check the correct table based on actual token role
                 actual_role = payload.get('role')
                 if actual_role == 'admin':
                     cursor.execute('SELECT admin_id FROM admin WHERE admin_id = %s LIMIT 1', (user_id,))
+                elif actual_role == 'verifier':
+                    cursor.execute('SELECT verifier_id FROM verifiers WHERE verifier_id = %s AND status = %s LIMIT 1', (user_id, 'active'))
+                elif actual_role == 'disburser':
+                    cursor.execute('SELECT disburser_id FROM disbursement_officers WHERE disburser_id = %s AND status = %s LIMIT 1', (user_id, 'active'))
                 else:
                     cursor.execute('SELECT user_id FROM users WHERE user_id = %s LIMIT 1', (user_id,))
 

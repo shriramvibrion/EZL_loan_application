@@ -40,6 +40,20 @@ When You Need Them</h2>
             User Login
           </button>
           <button
+            className="cta verifier-cta"
+            type="button"
+            onClick={() => (window.location.hash = '#/verifier-login')}
+          >
+            Verifier Login
+          </button>
+          <button
+            className="cta disburser-cta"
+            type="button"
+            onClick={() => (window.location.hash = '#/disburser-login')}
+          >
+            Disbursement Officer
+          </button>
+          <button
             className="cta admin-cta"
             type="button"
             onClick={() => (window.location.hash = '#/admin-login')}
