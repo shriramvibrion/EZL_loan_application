@@ -494,6 +494,11 @@ export default function Profile() {
   return (
     <>
       <AppNavbar activePage="profile" />
+      {toast ? (
+        <div className={`profile-toast profile-toast--${toast.type}`} role="alert">
+          {toast.message}
+        </div>
+      ) : null}
       <div className="profile-shell">
       <aside className="profile-sidebar">
         <div className="profile-sidebar-inner">
