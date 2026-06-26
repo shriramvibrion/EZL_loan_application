@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from config import Config
 from routes.auth import auth_bp
 from routes.profile import ensure_profile_tables, profile_bp
+from routes.loan import ensure_loan_tables, loan_bp
 
 
 load_dotenv()
@@ -16,9 +17,11 @@ def create_app():
     CORS(app)
     app.register_blueprint(auth_bp)
     app.register_blueprint(profile_bp)
+    app.register_blueprint(loan_bp)
 
     try:
         ensure_profile_tables()
+        ensure_loan_tables()
     except Exception as e:
         raise RuntimeError(f"❌ Database initialization failed: {e}") from e
 
