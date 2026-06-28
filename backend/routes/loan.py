@@ -316,6 +316,21 @@ def save_draft():
         # Build loan update dict
         loan_update = {k: data[k] for k in LOAN_FIELDS if k in data}
 
+        # Coerce empty strings to None for ALL numeric/decimal columns
+        NUMERIC_FIELDS = {'amount', 'tenure_months', 'monthly_income'}
+        for field in NUMERIC_FIELDS:
+            if field in loan_update and (loan_update[field] == '' or loan_update[field] is None):
+                loan_update[field] = None
+
+        CO_NUMERIC = {'monthly_gross', 'monthly_net', 'rental_income', 'other_income'}
+        G_NUMERIC  = {'annual_income', 'monthly_net'}
+
+        def _sanitize_numeric(d, fields):
+            for f in fields:
+                if f in d and (d[f] == '' or d[f] is None):
+                    d[f] = None
+            return d
+
         if existing:
             loan_id = existing['loan_id']
             if loan_update:
@@ -343,6 +358,7 @@ def save_draft():
         co_data = data.get('co_applicant')
         if co_data and isinstance(co_data, dict):
             co_update = {k: co_data[k] for k in CO_FIELDS if k in co_data}
+            co_update = _sanitize_numeric(co_update, CO_NUMERIC)
             if co_update:
                 cursor.execute('SELECT co_id FROM loan_co_applicants WHERE loan_id = %s', (loan_id,))
                 if cursor.fetchone():
@@ -364,6 +380,7 @@ def save_draft():
         g_data = data.get('guarantor')
         if g_data and isinstance(g_data, dict):
             g_update = {k: g_data[k] for k in GUARANTOR_FIELDS if k in g_data}
+            g_update = _sanitize_numeric(g_update, G_NUMERIC)
             if g_update:
                 cursor.execute('SELECT guarantor_id FROM loan_guarantors WHERE loan_id = %s', (loan_id,))
                 if cursor.fetchone():

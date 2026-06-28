@@ -188,22 +188,26 @@ function Step1({ form, setForm }) {
 		<>
 			<ProgressHeader title="Loan Selection" subtitle="Choose the financial product that fits your current needs." />
 			<div className="loan-two-column">
-				<section className="loan-stack">
-					{LOAN_TYPES.map((loan) => {
-						const Icon = loan.icon
-						const selected = form.loan_type === loan.name
-						return (
-							<button type="button" className={`selection-card ${selected ? 'selected' : ''}`} key={loan.name} onClick={() => setForm((f) => ({ ...f, loan_type: loan.name }))}>
-								<IconTile icon={Icon} />
-								<span>
+				<section className="loan-card" style={{ padding: '24px' }}>
+					<div className="loan-type-round-grid">
+						{LOAN_TYPES.map((loan) => {
+							const Icon = loan.icon
+							const selected = form.loan_type === loan.name
+							return (
+								<button
+									type="button"
+									className={`loan-type-round-btn ${selected ? 'selected' : ''}`}
+									key={loan.name}
+									onClick={() => setForm((f) => ({ ...f, loan_type: loan.name }))}
+								>
+									<span className="loan-type-round-icon"><Icon size={28} /></span>
 									<strong>{loan.name}</strong>
-									{loan.popular ? <b>Popular</b> : null}
-									<small>{loan.copy}</small>
-									<em>Eligibility Summary</em>
-								</span>
-							</button>
-						)
-					})}
+									{loan.popular ? <b className="popular-badge">Popular</b> : null}
+									{selected ? <span className="circle-check"><IconCircleCheck size={14} /></span> : null}
+								</button>
+							)
+						})}
+					</div>
 				</section>
 				<aside className="loan-card side-panel">
 					<h2>Why Choose Us?</h2>
@@ -233,7 +237,18 @@ function Step2({ form, setForm }) {
 					<div className="card-heading"><IconTile icon={IconFileText} /><h2>Configure Loan</h2></div>
 					<div className="amount-row">
 						<label>Loan Amount</label>
-						<strong>{money(amount)}</strong>
+						<div className="amount-input-wrap">
+							<span className="amount-prefix">Rs.</span>
+							<input
+								type="number"
+								className="amount-input"
+								min="10000"
+								max="5000000"
+								step="10000"
+								value={amount}
+								onChange={(e) => setForm((f) => ({ ...f, amount: Number(e.target.value) }))}
+							/>
+						</div>
 					</div>
 					<input className="loan-range" type="range" min="10000" max="5000000" step="10000" value={amount} onChange={(e) => setForm((f) => ({ ...f, amount: Number(e.target.value) }))} />
 					<div className="range-labels"><span>Min: Rs.10K</span><span>Max: Rs.50L</span></div>
@@ -371,7 +386,7 @@ function Step5({ form, setForm, loanId, toast }) {
 	)
 }
 
-function Step6({ form, setForm }) {
+function Step6({ form, setForm, co, setCo }) {
 	return (
 		<>
 			<ProgressHeader title="Joint Application" />
@@ -392,8 +407,15 @@ function Step6({ form, setForm }) {
 							<i />
 						</label>
 					</div>
-					{!form.has_co_applicant && (
+					{!form.has_co_applicant ? (
 						<><div className="empty-icon"><IconUserPlus size={44} /></div><p>Switch the toggle above to add a co-applicant to this loan request.</p></>
+					) : (
+						<div className="loan-form-grid" style={{ marginTop: 16 }}>
+							<Field label="Full Name" value={co.full_name || ''} placeholder="Co-applicant full name" onChange={(v) => setCo((c) => ({ ...c, full_name: v }))} />
+							<Field label="Relationship" value={co.relationship || ''} placeholder="e.g. Spouse, Parent, Sibling" onChange={(v) => setCo((c) => ({ ...c, relationship: v }))} />
+							<Field label="Aadhaar Number" value={co.aadhaar_number || ''} placeholder="XXXX XXXX XXXX" onChange={(v) => setCo((c) => ({ ...c, aadhaar_number: v }))} />
+							<Field label="PAN Number" value={co.pan_number || ''} placeholder="ABCDE1234F" onChange={(v) => setCo((c) => ({ ...c, pan_number: v.toUpperCase() }))} />
+						</div>
 					)}
 				</section>
 			</div>
@@ -466,7 +488,7 @@ function Step8({ co, setCo }) {
 	)
 }
 
-function Step9({ form, setForm }) {
+function Step9({ form, setForm, guarantor, setGuarantor }) {
 	return (
 		<>
 			<ProgressHeader title="Guarantor Details" />
@@ -481,6 +503,16 @@ function Step9({ form, setForm }) {
 						</label>
 					</div>
 					<div className="info-panel"><IconInfoCircle size={28} /> A guarantor agrees to pay a debt if the borrower defaults. Adding a strong guarantor can significantly increase approval chances and lower your interest rate.</div>
+					{!!form.has_guarantor && (
+						<div className="loan-card form-card" style={{ marginTop: 8 }}>
+							<h2>Guarantor Personal Information</h2>
+							<div className="loan-form-grid">
+								<Field label="Full Name" value={guarantor.full_name || ''} placeholder="Guarantor full name" onChange={(v) => setGuarantor((g) => ({ ...g, full_name: v }))} />
+								<Field label="Aadhaar Number" value={guarantor.aadhaar_number || ''} placeholder="XXXX XXXX XXXX" onChange={(v) => setGuarantor((g) => ({ ...g, aadhaar_number: v }))} />
+								<Field label="PAN Number" value={guarantor.pan_number || ''} placeholder="ABCDE1234F" onChange={(v) => setGuarantor((g) => ({ ...g, pan_number: v.toUpperCase() }))} />
+							</div>
+						</div>
+					)}
 				</section>
 				<aside className="loan-stack">
 					<div className="mini-summary"><h2>Summary</h2><dl><div><dt>Loan Amount</dt><dd>{money(form.amount)}</dd></div><div><dt>Tenure</dt><dd>{form.tenure_months || 36} Months</dd></div></dl></div>
@@ -724,13 +756,15 @@ export default function ApplyLoan() {
 		applicant_phone: profile?.phone_number || '',
 		applicant_email: profile?.email || '',
 		applicant_address: profile?.address || '',
-		aadhaar_number: '',
-		pan_number: '',
-		employment_type: 'Salaried',
-		company_name: '',
-		designation: '',
-		monthly_income: '',
-		total_experience: '',
+		// Pre-fill KYC from profile
+		aadhaar_number: profile?.aadhaar_number || '',
+		pan_number: profile?.pan_number || '',
+		// Pre-fill employment from profile
+		employment_type: profile?.employment_type || 'Salaried',
+		company_name: profile?.company || '',
+		designation: profile?.designation || '',
+		monthly_income: profile?.income || '',
+		total_experience: profile?.experience || '',
 		current_exp: '',
 		has_co_applicant: 0,
 		has_guarantor: 0,
@@ -748,7 +782,6 @@ export default function ApplyLoan() {
 	const [submitting, setSubmitting] = useState(false)
 	const [toast, setToastState] = useState(null)
 	const toastTimer = useRef(null)
-	const isSuccess = activeStep === TOTAL_CARDS - 1
 
 	const showToast = useCallback((message, type = 'success') => {
 		setToastState({ message, type })
@@ -819,18 +852,51 @@ export default function ApplyLoan() {
 		}
 	}, [form, co, guarantor, showToast])
 
+	// Dynamic visible steps — skip co-applicant/guarantor steps if not selected
+	const visibleCards = useMemo(() => {
+		const list = [
+			{ idx: 0,  title: 'Loan Selection',             node: <Step1 key="s1" form={form} setForm={setForm} /> },
+			{ idx: 1,  title: 'Loan Information',           node: <Step2 key="s2" form={form} setForm={setForm} /> },
+			{ idx: 2,  title: 'Applicant Details',          node: <Step3 key="s3" form={form} setForm={setForm} profile={profile} /> },
+			{ idx: 3,  title: 'Applicant KYC',              node: <Step4 key="s4" form={form} setForm={setForm} /> },
+			{ idx: 4,  title: 'Income & Employment',        node: <Step5 key="s5" form={form} setForm={setForm} loanId={loanId} toast={showToast} /> },
+			{ idx: 5,  title: 'Joint Application',          node: <Step6 key="s6" form={form} setForm={setForm} co={co} setCo={setCo} /> },
+		]
+		if (form.has_co_applicant) {
+			list.push({ idx: 6, title: 'Co-Applicant KYC',    node: <Step7 key="s7" co={co} setCo={setCo} /> })
+			list.push({ idx: 7, title: 'Co-Applicant Income', node: <Step8 key="s8" co={co} setCo={setCo} /> })
+		}
+		list.push({ idx: 8, title: 'Guarantor Details', node: <Step9 key="s9" form={form} setForm={setForm} guarantor={guarantor} setGuarantor={setGuarantor} /> })
+		if (form.has_guarantor) {
+			list.push({ idx: 9,  title: 'Guarantor Verification',   node: <Step10 key="s10" guarantor={guarantor} setGuarantor={setGuarantor} /> })
+			list.push({ idx: 10, title: 'Guarantor Income Details', node: <Step11 key="s11" guarantor={guarantor} setGuarantor={setGuarantor} /> })
+		}
+		list.push({ idx: 11, title: 'Document Upload',          node: <Step12 key="s12" loanId={loanId} documents={documents} setDocuments={setDocuments} toast={showToast} /> })
+		list.push({ idx: 12, title: 'Eligibility & Review',     node: <Step13 key="s13" form={form} /> })
+		list.push({ idx: 13, title: 'Legal Compliance',         node: <Step14 key="s14" form={form} setForm={setForm} /> })
+		list.push({ idx: 14, title: 'Final Review & Submission',node: <Step15 key="s15" form={form} applicationId={applicationId} /> })
+		list.push({ idx: 15, title: 'Application Submitted',    node: <SuccessCard key="success" applicationId={applicationId} /> })
+		return list
+	}, [form, co, guarantor, loanId, documents, applicationId, profile, showToast])
+
+	// Clamp cardIndex if visible cards shrink (e.g. user unchecks co-applicant)
+	const safeCardIndex = Math.min(activeStep, visibleCards.length - 1)
+	const currentCard = visibleCards[safeCardIndex]
+	const isSuccess = safeCardIndex === visibleCards.length - 1
+	const isLastRealStep = safeCardIndex === visibleCards.length - 2
+
 	const previous = () => setActiveStep((s) => Math.max(0, s - 1))
 
 	const next = async () => {
-		if (activeStep === TOTAL_STEPS - 1) {
-			// Final submit
+		if (isSuccess) return
+		if (isLastRealStep) {
 			if (!form.agreed_terms) { showToast('Please accept the loan agreement terms', 'error'); return }
 			setSubmitting(true)
 			try {
-				await saveDraft(activeStep)
+				await saveDraft(safeCardIndex)
 				const res = await submitLoanApplication()
 				setApplicationId(res.application_id)
-				setActiveStep(TOTAL_CARDS - 1)
+				setActiveStep(visibleCards.length - 1)
 				showToast('Application submitted successfully!', 'success')
 			} catch (err) {
 				showToast(err.message || 'Submission failed', 'error')
@@ -838,30 +904,11 @@ export default function ApplyLoan() {
 				setSubmitting(false)
 			}
 		} else {
-			const nextStep = activeStep + 1
-			await saveDraft(nextStep)
-			setActiveStep(nextStep)
+			const nextIndex = safeCardIndex + 1
+			await saveDraft(nextIndex)
+			setActiveStep(nextIndex)
 		}
 	}
-
-	const cards = [
-		<Step1 form={form} setForm={setForm} />,
-		<Step2 form={form} setForm={setForm} />,
-		<Step3 form={form} setForm={setForm} profile={profile} />,
-		<Step4 form={form} setForm={setForm} />,
-		<Step5 form={form} setForm={setForm} loanId={loanId} toast={showToast} />,
-		<Step6 form={form} setForm={setForm} />,
-		<Step7 co={co} setCo={setCo} />,
-		<Step8 co={co} setCo={setCo} />,
-		<Step9 form={form} setForm={setForm} />,
-		<Step10 guarantor={guarantor} setGuarantor={setGuarantor} />,
-		<Step11 guarantor={guarantor} setGuarantor={setGuarantor} />,
-		<Step12 loanId={loanId} documents={documents} setDocuments={setDocuments} toast={showToast} />,
-		<Step13 form={form} />,
-		<Step14 form={form} setForm={setForm} />,
-		<Step15 form={form} applicationId={applicationId} />,
-		<SuccessCard applicationId={applicationId} />,
-	]
 
 	return (
 		<main className="loan-apply-page">
@@ -878,20 +925,20 @@ export default function ApplyLoan() {
 				<section className="loan-apply-panel">
 					<StepBreadcrumb />
 					<div className={`loan-step-card ${isSuccess ? 'is-success' : ''}`}>
-						<div className="loan-step-body">{cards[activeStep]}</div>
+						<div className="loan-step-body">{currentCard?.node}</div>
 					</div>
 				</section>
 			</div>
 
 			<footer className="loan-flow-footer">
 				<div>
-					<small>{isSuccess ? 'Submitted' : `Step ${Math.min(activeStep + 1, TOTAL_STEPS)}/${TOTAL_STEPS}`}</small>
-					<strong>{STEP_TITLES[activeStep]}</strong>
+					<small>{isSuccess ? 'Submitted' : `Step ${safeCardIndex + 1}/${visibleCards.length - 1}`}</small>
+					<strong>{currentCard?.title || ''}</strong>
 				</div>
 				<div>
-					<button type="button" className="footer-secondary" disabled={activeStep === 0 || isSuccess} onClick={previous}><IconArrowLeft size={22} /> Previous</button>
+					<button type="button" className="footer-secondary" disabled={safeCardIndex === 0 || isSuccess} onClick={previous}><IconArrowLeft size={22} /> Previous</button>
 					<button type="button" className="footer-primary" disabled={isSuccess || submitting} onClick={next}>
-						{submitting ? 'Submitting...' : activeStep === TOTAL_STEPS - 1 ? 'Submit Application' : 'Next'} <IconArrowRight size={22} />
+						{submitting ? 'Submitting...' : isLastRealStep ? 'Submit Application' : 'Next'} <IconArrowRight size={22} />
 					</button>
 				</div>
 			</footer>

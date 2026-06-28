@@ -2022,3 +2022,138 @@
   border-radius: 6px;
   pointer-events: none;
 }
+
+/* ── Round loan type buttons ── */
+.loan-type-round-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.loan-type-round-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 2.5px solid var(--outline-variant, #e2e8f0);
+  background: var(--surface, #fff);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 120px;
+  border-radius: 16px;
+  padding: 20px 10px 16px;
+  text-align: center;
+  position: relative;
+}
+
+.loan-type-round-btn:hover {
+  border-color: #4f46e5;
+  background: #f5f3ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(79,70,229,0.12);
+}
+
+.loan-type-round-btn.selected {
+  border-color: #4f46e5;
+  background: #eef2ff;
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.18);
+}
+
+.loan-type-round-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #f0f4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4f46e5;
+  transition: background 0.2s, color 0.2s;
+}
+
+.loan-type-round-btn.selected .loan-type-round-icon {
+  background: #4f46e5;
+  color: #fff;
+}
+
+.loan-type-round-btn strong {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--on-surface, #1e293b);
+  line-height: 1.2;
+}
+
+.loan-type-round-btn small {
+  font-size: 0.68rem;
+  color: var(--on-surface-variant, #64748b);
+  display: none;
+}
+
+.circle-check {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  background: #4f46e5;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.popular-badge {
+  position: absolute;
+  top: -8px;
+  left: -4px;
+  background: #f59e0b;
+  color: #fff;
+  font-size: 0.58rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 99px;
+}
+
+/* ── Amount input field ── */
+.amount-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--outline-variant, #e2e8f0);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface-low, #f8fafc);
+}
+
+.amount-prefix {
+  padding: 0 12px;
+  font-weight: 700;
+  color: #64748b;
+  border-right: 1px solid var(--outline-variant, #e2e8f0);
+  background: #f1f5f9;
+  line-height: 42px;
+}
+
+.amount-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 10px 14px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--on-surface, #1e293b);
+  min-width: 0;
+}
+
+.amount-input::-webkit-inner-spin-button,
+.amount-input::-webkit-outer-spin-button { opacity: 0.4; }
+
+@media (max-width: 640px) {
+  .loan-type-round-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .loan-type-round-btn { padding: 14px 8px; }
+  .loan-type-round-icon { width: 40px; height: 40px; }
+}
